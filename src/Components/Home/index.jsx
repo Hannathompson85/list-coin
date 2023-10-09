@@ -7,6 +7,9 @@ import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Button from '@mui/material/Button';
+import Popover from '@mui/material/Popover';
+import { Divider } from '@mui/material';
+import DropdownImg from '../../img/Chevron-Right-1.png'
 
 
 const steps = ['Device', 'Verification', 'Receive'];
@@ -44,14 +47,29 @@ const DummyData = [
     },
 ]
 
+const deviceData = [
+    {
+        name: "Select the Wallet On device",
+        selected: false
+    },
+    {
+        name: "Select the Coin on device",
+        selected: false
+    },
+    {
+        name: "Tap 1 card of any 4 Cards",
+        selected: false
+    },
+]
+
 const style = {
     position: 'absolute',
     top: '50%',
     left: '50%',
-    padding:"50px",
+    padding: "50px",
     transform: 'translate(-50%, -50%)',
     width: 800,
-    height:'80%',
+    height: '80%',
     bgcolor: '#13161A',
     color: "black",
     border: '2px solid #000',
@@ -61,51 +79,31 @@ const style = {
 
 const Home = () => {
     const [modal, setModal] = useState(false)
-    const [activeStep, setActiveStep] = React.useState(0);
-    const [skipped, setSkipped] = React.useState(new Set());
+    const [activeStep, setActiveStep] = useState(0);
+    const [skipped, setSkipped] = useState(new Set());
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [filter, setFilter] = useState("Amount   High - Low");
 
-    const isStepOptional = (step) => {
-        return step === 1;
-      };
-    
-      const isStepSkipped = (step) => {
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const open = Boolean(anchorEl);
+    const id = open ? 'simple-popover' : undefined;
+
+    const isStepSkipped = (step) => {
         return skipped.has(step);
-      };
-    
-      const handleNext = () => {
-        let newSkipped = skipped;
-        if (isStepSkipped(activeStep)) {
-          newSkipped = new Set(newSkipped.values());
-          newSkipped.delete(activeStep);
-        }
-    
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
-        setSkipped(newSkipped);
-      };
-    
-      const handleBack = () => {
-        setActiveStep((prevActiveStep) => prevActiveStep - 1);
-      };
-    
-      const handleSkip = () => {
-        if (!isStepOptional(activeStep)) {
-          // You probably want to guard against something like this,
-          // it should never occur unless someone's actively trying to break something.
-          throw new Error("You can't skip a step that isn't optional.");
-        }
-    
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
-        setSkipped((prevSkipped) => {
-          const newSkipped = new Set(prevSkipped.values());
-          newSkipped.add(activeStep);
-          return newSkipped;
-        });
-      };
-    
-      const handleReset = () => {
-        setActiveStep(0);
-      };
-      
+    };
+
+    const setFilterFun = (item) => {
+        setFilter(item)
+        handleClose()
+    }
+
 
     return (<>
         <div className='mainPage d-flex'>
@@ -213,7 +211,37 @@ const Home = () => {
                 </div>
                 <div className="cust-row total-coin-outer">
                     <p className='cust-label'>Total Coin - 6</p>
-                    <p className='cust-label'>Amount High - Low</p>
+                    <p className='cust-label drop-down' aria-describedby={id} variant="contained" onClick={handleClick} >
+                        <span className='cust-icon'>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 12" fill="none">
+                                <path d="M3.64645 11.3536C3.84171 11.5488 4.15829 11.5488 4.35355 11.3536L7.53553 8.17157C7.7308 7.97631 7.7308 7.65973 7.53553 7.46447C7.34027 7.2692 7.02369 7.2692 6.82843 7.46447L4 10.2929L1.17157 7.46447C0.97631 7.2692 0.659728 7.2692 0.464466 7.46447C0.269204 7.65973 0.269204 7.97631 0.464466 8.17157L3.64645 11.3536ZM3.5 1L3.5 11L4.5 11L4.5 1L3.5 1Z" fill="#C78D4E" />
+                                <path d="M12.3536 0.646446C12.1583 0.451184 11.8417 0.451184 11.6464 0.646446L8.46447 3.82843C8.2692 4.02369 8.2692 4.34027 8.46447 4.53553C8.65973 4.7308 8.97631 4.7308 9.17157 4.53553L12 1.70711L14.8284 4.53553C15.0237 4.7308 15.3403 4.7308 15.5355 4.53553C15.7308 4.34027 15.7308 4.02369 15.5355 3.82843L12.3536 0.646446ZM12.5 11L12.5 1L11.5 1L11.5 11L12.5 11Z" fill="#C78D4E" />
+                            </svg>
+                        </span>
+                        {filter}
+                        <span className='drop-down-icon'>
+                            <img src={DropdownImg} className={open ? "rotate" : ""} />
+                        </span>
+                    </p>
+
+                    <Popover
+                        id={id}
+                        open={open}
+                        anchorEl={anchorEl}
+                        onClose={handleClose}
+                        className='cust-filter'
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'right',
+                        }}
+                    >
+                        <div className='cust-filter-wrapper'>
+                            <Typography sx={{ p: 1 }} onClick={() => setFilterFun("Amount   High - Low")}>Amount   High - Low</Typography>
+                            <Typography sx={{ p: 1 }} onClick={() => setFilterFun("Amount   Low - High")}>Amount   Low - High</Typography>
+                            <Typography sx={{ p: 1 }} onClick={() => setFilterFun("Arrange   A-Z")}>Arrange   A-Z</Typography>
+                            <Typography sx={{ p: 1 }} onClick={() => setFilterFun("Arrange   Z-A")}>Arrange   Z-A</Typography>
+                        </div>
+                    </Popover>
                 </div>
                 <div className="total-recordslist-outer">
                     {DummyData.map(item =>
@@ -233,9 +261,9 @@ const Home = () => {
                                 <span>{item.value}</span>
                             </div>
                             <div className="recordlistitem-col action-btn">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="9" viewBox="0 0 10 9" fill="none">
+                                <a href="javascript:void(0);" onClick={() => setModal(true)} className='receive'><svg xmlns="http://www.w3.org/2000/svg" width="10" height="9" viewBox="0 0 10 9" fill="none">
                                     <path d="M2.45682 5.41176L2.52147 3.20218C2.51302 2.85385 2.22629 2.5752 1.89464 2.57591L1.89434 2.57591C1.54078 2.57625 1.2653 2.85173 1.26496 3.20529L1.26498 3.20529L1.26494 3.20843L1.20638 7.53931C1.20687 7.87541 1.48928 8.15693 1.82444 8.15622L1.82444 8.15616L1.82986 8.15626L6.30571 8.24367C6.65814 8.24211 6.93239 7.96707 6.93273 7.6143C6.93306 7.27755 6.65031 6.99523 6.31467 6.99594L6.31467 6.99614L6.3047 6.99577L3.93465 6.90626L3.36232 6.88465L3.76731 6.47966L8.90072 1.34625C9.14963 1.09734 9.15178 0.702239 8.91077 0.461226C8.66648 0.216939 8.26249 0.216839 8.0169 0.462433L2.88349 5.59585L2.43841 6.04093L2.45682 5.41176Z" fill="#8484F1" stroke="#161C23" stroke-width="0.5" />
-                                </svg><a href="javascript:void(0);" onClick={() => setModal(true)} className='receive'>RECEIVE</a>
+                                </svg>RECEIVE</a>
                                 <a href="" className='send'><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 9 9" fill="none">
                                     <path d="M6.95987 3.1049L6.94261 5.31536C6.95853 5.66343 7.25117 5.93586 7.58273 5.92804L7.58302 5.92803C7.9365 5.92011 8.20601 5.63879 8.19877 5.2853L8.19875 5.2853L8.19872 5.28216L8.1644 0.951025C8.15671 0.615006 7.86832 0.339608 7.53326 0.34751L7.53326 0.347569L7.52784 0.347579L3.05114 0.356162C2.69883 0.365283 2.43054 0.646139 2.43776 0.998838C2.44466 1.33551 2.73339 1.61171 3.06894 1.6038L3.06893 1.6036L3.07891 1.60376L5.45034 1.64242L6.023 1.65176L5.62679 2.06534L0.604627 7.30764C0.361114 7.56183 0.367429 7.95689 0.613554 8.19268C0.863023 8.43167 1.26692 8.42311 1.50719 8.1723L6.52935 2.93L6.96479 2.47548L6.95987 3.1049Z" fill="#CAA276" stroke="#161C23" stroke-width="0.5" />
                                 </svg>SEND</a>
@@ -252,17 +280,20 @@ const Home = () => {
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
         >
-            <Box sx={style}>
-                <Box sx={{ width: '100%' }}>
-                    <Stepper activeStep={activeStep}>
+            <Box sx={style} className="cust-model-wrapper">
+                <h2 className='heading-text'>Receive</h2>
+                <span className='close-icon' onClick={() => {
+                    setModal(false)
+                }} >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <path d="M7.51649 4.87645L11.5562 0.835978C11.752 0.648275 12.0135 0.544477 12.2848 0.546835C12.5575 0.549204 12.8183 0.658572 13.0111 0.851383L13.3647 0.49783L13.0111 0.851384C13.2039 1.04419 13.3133 1.30502 13.3157 1.57769C13.318 1.84905 13.2142 2.11053 13.0265 2.30636L8.98678 6.34686L8.63329 6.70042L8.98681 7.05394L13.0299 11.097L13.0298 11.0971L13.0391 11.106C13.1398 11.2016 13.2203 11.3164 13.2759 11.4436C13.3315 11.5708 13.361 11.7078 13.3628 11.8466C13.3646 11.9854 13.3386 12.1231 13.2864 12.2517C13.2341 12.3803 13.1566 12.4971 13.0585 12.5953C12.9603 12.6934 12.8435 12.771 12.715 12.8233C12.5864 12.8756 12.4487 12.9017 12.3099 12.8999C12.1711 12.8982 12.034 12.8686 11.9068 12.8131C11.7796 12.7575 11.6648 12.6771 11.5692 12.5765L11.5693 12.5764L11.5603 12.5674L7.51646 8.52352L7.1629 8.16997L6.80935 8.52352L2.77048 12.5624C2.57433 12.7466 2.31432 12.8477 2.04509 12.8442C1.77391 12.8406 1.51484 12.7313 1.32311 12.5395L0.969498 12.893L1.32311 12.5395C1.13138 12.3477 1.02216 12.0886 1.01874 11.8175C1.01534 11.5482 1.11651 11.2882 1.30083 11.0921L5.339 7.05394L5.69252 6.70042L5.33903 6.34686L1.29594 2.30301L1.29606 2.30289L1.28668 2.29398C1.18603 2.19839 1.10554 2.08362 1.04994 1.95644C0.994349 1.82925 0.96478 1.69222 0.962978 1.55343C0.961177 1.41463 0.987179 1.27688 1.03945 1.14829C1.09173 1.01971 1.16922 0.902886 1.26735 0.804718C1.36548 0.70655 1.48228 0.629021 1.61084 0.576702C1.73941 0.524382 1.87715 0.49833 2.01595 0.500083C2.15474 0.501835 2.29178 0.531356 2.41899 0.586905C2.5462 0.642454 2.661 0.722907 2.75662 0.823522L2.7565 0.823633L2.76549 0.832625L6.80935 4.87648L7.16294 5.23007L7.51649 4.87645Z" fill="#9D9D9D" stroke="#0A1018" />
+                    </svg>
+                </span>
+                <Box sx={{ width: '100%' }} className="cust-model-inner">
+                    <Stepper activeStep={activeStep} className='cust-steper'>
                         {steps.map((label, index) => {
                             const stepProps = {};
                             const labelProps = {};
-                            // if (isStepOptional(index)) {
-                            //     labelProps.optional = (
-                            //         <Typography variant="caption">Optional</Typography>
-                            //     );
-                            // }
                             if (isStepSkipped(index)) {
                                 stepProps.completed = false;
                             }
@@ -273,41 +304,23 @@ const Home = () => {
                             );
                         })}
                     </Stepper>
-                    {activeStep === steps.length ? (
-                        <React.Fragment>
-                            <Typography sx={{ mt: 2, mb: 1 }}>
-                                All steps completed - you&apos;re finished
-                            </Typography>
-                            <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-                                <Box sx={{ flex: '1 1 auto' }} />
-                                <Button onClick={handleReset}>Reset</Button>
-                            </Box>
-                        </React.Fragment>
-                    ) : (
-                        <React.Fragment>
-                            {/* <Typography sx={{ mt: 2, mb: 1 }}>Step {activeStep + 1}</Typography>
-                            <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-                                <Button
-                                    color="inherit"
-                                    disabled={activeStep === 0}
-                                    onClick={handleBack}
-                                    sx={{ mr: 1 }}
-                                >
-                                    Back
-                                </Button>
-                                <Box sx={{ flex: '1 1 auto' }} />
-                                {isStepOptional(activeStep) && (
-                                    <Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
-                                        Skip
-                                    </Button>
-                                )} */}
-
-                                {/* <Button onClick={handleNext}>
-                                    {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                                </Button>
-                            </Box> */}
-                        </React.Fragment>
-                    )}
+                    {activeStep === 0 ? (
+                        <div>
+                            <div className='card-main'>
+                                <p>Follow the instruction on device</p>
+                                {deviceData.map(item => (
+                                    <div className='device-card'>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="9" viewBox="0 0 12 9" fill="none">
+                                            <path d="M8.96989 5.44779L7.36176 6.96448C7.12142 7.21676 7.12714 7.61654 7.36216 7.85056L7.36237 7.85076C7.61261 8.10053 8.0022 8.10053 8.25245 7.85076L8.25243 7.85075L8.25468 7.84856L11.3585 4.82757C11.5958 4.58957 11.5952 4.19081 11.3577 3.95432L11.3576 3.95436L11.3539 3.95046L8.25077 0.723741C8.00046 0.475646 7.61206 0.476202 7.36237 0.725408C7.12402 0.963291 7.12432 1.36286 7.36216 1.59968L7.3623 1.59954L7.36908 1.60686L8.98168 3.34603L9.37109 3.76601L8.79835 3.76601L1.53861 3.76601C1.1866 3.76601 0.905697 4.04386 0.905697 4.38471C0.905697 4.73018 1.19129 5.01591 1.53861 5.01591L8.79835 5.01592L9.42779 5.01592L8.96989 5.44779Z" fill="#CAA276" stroke="#212427" stroke-width="0.5" />
+                                        </svg>
+                                        <p>{item.name}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : ""}
+                    <Divider sx={{ background: "#272726" }} />
+                    <Button variant='outlined' className='cust-submit-btn'>Continue</Button>
                 </Box>
             </Box>
         </Modal>
